@@ -1,0 +1,70 @@
+pipeline {
+    agent any
+    stages {
+        stage('for any branch') {
+            steps {
+                checkout scmGit(branches: [[name: '*/**']], extensions: [], userRemoteConfigs: [[credentialsId: 'd6b99116-2f2d-47b9-9a25-d935a47dcbbf', url: 'https://bitbucket.org/provility-admin/recommendation-system.git']])
+            }
+        }
+        stage('for main branch') {
+            when {
+                expression {
+                    script {
+                        def branchName = checkout(scm).GIT_BRANCH
+                        return branchName == 'origin/main'
+                    }
+                }
+            }
+            steps {
+                echo 'main branch'
+            }
+        }
+        stage('for staging branch') {
+            when {
+                expression {
+                    script {
+                        def branchName = checkout(scm).GIT_BRANCH
+                        return branchName == 'origin/staging'
+                    }
+                }
+            }
+            steps {
+                echo 'staging branch'
+            }
+        }
+        stage('for develop branch') {
+            when {
+                expression {
+                    script {
+                        def branchName = checkout(scm).GIT_BRANCH
+                        return branchName == 'origin/develop'
+                    }
+                }
+            }
+            steps {
+                echo 'develop branch'
+            }
+        }
+        stage('for production branch') {
+            when {
+                expression {
+                    script {
+                        def branchName = checkout(scm).GIT_BRANCH
+                        return branchName == 'origin/prod'
+                    }
+                }
+            }
+            steps {
+                echo 'production branch'
+            }
+        }
+        stage('for pull request') {
+            when {
+                changeRequest()
+            }
+            steps {
+                echo 'pull request'
+            }
+        }
+    }
+}
