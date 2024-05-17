@@ -6,65 +6,38 @@ pipeline {
                 checkout scmGit(branches: [[name: '*/**']], extensions: [], userRemoteConfigs: [[credentialsId: 'd6b99116-2f2d-47b9-9a25-d935a47dcbbf', url: 'https://bitbucket.org/provility-admin/recommendation-system.git']])
             }
         }
-        stage('for main branch') {
-            when {
-                expression {
-                    script {
-                        def branchName = checkout(scm).GIT_BRANCH
-                        return branchName == 'origin/main'
+        pipeline {
+            agent any
+            stages {
+                stage('Trigger Branch Jobs') {
+                    steps {
+                        script {
+                            def branchName = env.BRANCH_NAME
+
+                            switch(branchName) {
+                                case 'main':
+                                    echo "Triggering main branch job"
+                                    build job: 'main-branch-job'
+                                    break
+                                case 'develop':
+                                    echo "Triggering develop branch job"
+                                    build job: 'develop-branch-job'
+                                    break
+                                case 'qa':
+                                    echo "Triggering qa branch job"
+                                    build job: 'qa-branch-job'
+                                    break
+                                case 'staging':
+                                    echo "Triggering staging branch job"
+                                    build job: 'staging-branch-job'
+                                    break
+                                default:
+                                    echo "No matching branch job found"
+                            }
+                        }
                     }
                 }
             }
-            steps {
-                echo 'main branch'
-            }
         }
-        stage('for staging branch') {
-            when {
-                expression {
-                    script {
-                        def branchName = checkout(scm).GIT_BRANCH
-                        return branchName == 'origin/staging'
-                    }
-                }
-            }
-            steps {
-                echo 'staging branch'
-            }
-        }
-        stage('for develop branch') {
-            when {
-                expression {
-                    script {
-                        def branchName = checkout(scm).GIT_BRANCH
-                        return branchName == 'origin/develop'
-                    }
-                }
-            }
-            steps {
-                echo 'develop branch'
-            }
-        }
-        stage('for production branch') {
-            when {
-                expression {
-                    script {
-                        def branchName = checkout(scm).GIT_BRANCH
-                        return branchName == 'origin/prod'
-                    }
-                }
-            }
-            steps {
-                echo 'production branch'
-            }
-        }
-        stage('for pull request') {
-            when {
-                changeRequest()
-            }
-            steps {
-                echo 'pull request'
-            }
-        }
-    }
+}
 }
